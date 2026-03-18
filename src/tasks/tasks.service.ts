@@ -12,4 +12,13 @@ export class TasksService {
     findOneTask(id: string) {
         return { id: 1, task: "Comprar pão"}
     }
+
+    create(body: any) {
+        return body;
+    }
+
+    update(id: string, body: any){
+        let retorno = { id, body}
+        return retorno
+    }
 }
