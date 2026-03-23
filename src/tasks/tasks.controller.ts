@@ -4,7 +4,8 @@ import { Controller,
          Query,
          Post,
          Put,
-         Body
+         Body,
+         Delete
 } from '@nestjs/common';
 import { TasksService } from './tasks.service'
 import { create } from 'domain';
@@ -36,5 +37,10 @@ export class TasksController {
     @Put(":id") //Patch
     updateTask(@Param ('id') id: string, @Body() body: any) {
         return this.taskService.update(id, body)
+    }
+
+    @Delete(":id")
+    deleteTask(@Param ('id') id: string) {
+        return this.taskService.delete(id)
     }
 }
