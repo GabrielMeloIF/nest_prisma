@@ -18,7 +18,8 @@ export class TasksController {
     constructor(private readonly taskService: TasksService) { }
 
     @Get()
-    getTasks() {
+    getTasks(@Query() params: any) {
+        console.log(params);
         return this.taskService.listAllTasks()
     }
 
