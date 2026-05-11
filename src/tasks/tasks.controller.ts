@@ -1,54 +1,60 @@
-import { Controller,
-         Get,
-         Param,
-         Query,
-         Post,
-         Put,
-         Body,
-         Delete,
-         ParseIntPipe,
-         UseInterceptors
+import {
+	Controller,
+	Get,
+	Post,
+	Param,
+	Query,
+	Body,
+	Put,
+	Delete,
+	ParseIntPipe,
+	UseInterceptors
 } from '@nestjs/common';
-import { TasksService } from './tasks.service'
-import { create } from 'domain';
-import { CreateTaskDto } from './dto/create.task.dto';
+import { TasksService } from './tasks.service';
 import { UpdateTaskDto } from './dto/update.task.dto';
-import { PaginationDto } from 'src/app/common/dto/pagination.dto';
-import { BodyCreateTaskInterceptor } from 'src/app/common/interceptors/add-header.interceptor';
+import { CreateTaskDto } from './dto/create.task.dto';
+import { PaginationDto } from '../common/dto/pagination.dto';
+import { LoggerInterceptor } from '../common/interceptors/logger.interceptor';
+import { BodyCreateTaskInterceptor } from 'src/common/interceptors/body-create-task.interceptor';
+import { AddHeaderInterceptor } from 'src/common/interceptors/add-header.interceptor';
 
 @Controller('tasks')
+	//@UseInterceptors(LoggerInterceptor)
+	// Podemos usar o interceptor para todas as rotas do controller, ou apenas para rotas específicas,
+	// como a rota de listagem de tarefas, por exemplo.
+	// Depois de testado, podemos decidir onde aplicar o interceptor.
 export class TasksController {
-    constructor(private readonly taskService: TasksService) { }
+	constructor(private readonly taskService: TasksService) {}
 
-    @Get()
-    getTasks(@Query() PaginationDto: PaginationDto) {
-        console.log(PaginationDto);
-        return this.taskService.listAllTasks(PaginationDto)
-    }
+	@Get()
+	@UseInterceptors(LoggerInterceptor)
+	@UseInterceptors(AddHeaderInterceptor)
+	// Depois de testado no Postmamp, podemos definir um DTO para os parâmetros de consulta
+	//findAllTasks(@Query() params: any) {
+	findAllTasks(@Query() paginationDto: PaginationDto) {
+		//console.log(params)
+		//console.log(paginationDto)
+		return this.taskService.findAll(paginationDto)
+	}
 
-    @Get("/busca")
-    @UseInterceptors(BodyCreateTaskInterceptor)
-    findManyTasks(@Query() queryParam: any) {
-        return this.taskService
-    }
-    
-    @Get(":id")
-    findSingleTask(@Param('id', ParseIntPipe) id: number) {
-        return this.taskService.findOneTask(id)
-    }
+	@Get(":id")
+	findOneTask(@Param('id', ParseIntPipe) id: number) {
+		return this.taskService.findOne(id)
+	}
 
-    @Post()
-    createTask(@Body() createTaskDto: CreateTaskDto) {
-        return this.taskService.create(createTaskDto)
-    }
+	@Post()
+	@UseInterceptors(BodyCreateTaskInterceptor)
+	createTask(@Body() createTaskDto: CreateTaskDto) {
+		return this.taskService.create(createTaskDto)
+	}
 
-    @Put(":id") //Patch
-    updateTask(@Param ('id', ParseIntPipe) id: number, @Body() updateTaskDto: UpdateTaskDto) {
-        return this.taskService.update(id, updateTaskDto)
-    }
+	@Put(":id")
+	updateTask(@Param("id", ParseIntPipe) id: number, @Body() updateTaskDto: UpdateTaskDto) {
+		return this.taskService.update(id, updateTaskDto)
+	}
 
-    @Delete(":id")
-    deleteTask(@Param ('id', ParseIntPipe) id: number) {
-        return this.taskService.delete(id)
-    }
+	@Delete(":id")
+	deleteTask(@Param("id", ParseIntPipe) id: number) {
+		return this.taskService.delete(id)
+	}
 }
